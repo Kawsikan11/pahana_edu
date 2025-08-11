@@ -1,0 +1,58 @@
+/* General page style */
+body {
+    background-color: #f0f8ff; /* Light blue background */
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+/* Login container styling */
+form {
+    background-color: white;
+    padding: 25px 35px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    width: 300px;
+    text-align: center;
+}
+
+/* Heading */
+h2 {
+    margin-bottom: 20px;
+    font-size: 24px;
+    color: #003366; /* Dark blue */
+    font-weight: bold;
+}
+
+/* Labels (Username & Password) */
+form input[type="text"],
+form input[type="password"] {
+    width: 90%;
+    padding: 10px;
+    margin-top: 8px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+/* Login Button */
+form input[type="submit"] {
+    width: 100%;
+    padding: 12px;
+    background-color: #007BFF; /* Bootstrap blue */
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    border-radius: 25px; /* Curved button */
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+form input[type="submit"]:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+}
