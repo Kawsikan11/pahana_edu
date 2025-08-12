@@ -56,3 +56,28 @@ form input[type="submit"] {
 form input[type="submit"]:hover {
     background-color: #0056b3; /* Darker blue on hover */
 }
+
+
+
+
+
+
+button {
+    background-color: rgb(192, 192, 192);
+    color: white;
+    width: 100%; /* same width as submit */
+    padding: 12px; /* same height as submit */
+    border: none;
+    border-radius: 25px; /* curved shape */
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    margin-top: 10px; /* moves it down slightly */
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #a0a0a0; /* slightly darker on hover */
+}
+
+
