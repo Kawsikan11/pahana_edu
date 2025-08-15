@@ -23,26 +23,34 @@ public class LoginServlet extends HttpServlet {
             Class.forName("com.mysql.cj.jdbc.Driver");
 
             // Connect to database
-            Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/pahana_edu", "root", "");
+            Connection conn = DriverManager.getConnection(
+                    "jdbc:mysql://localhost:3306/pahana_edu", "root", "");
 
             // Prepare SQL query to check user
-            PreparedStatement stmt = conn.prepareStatement("SELECT * FROM users WHERE username=? AND password=?");
+            PreparedStatement stmt = conn.prepareStatement(
+                    "SELECT roll FROM users WHERE username=? AND password=?");
             stmt.setString(1, username);
             stmt.setString(2, password);
 
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
-                // User found, check if admin
-                if ("admin".equalsIgnoreCase(username)) {
-                    // Redirect admin user to admin.jsp
+                String role = rs.getString("roll");
+
+                // Store username in session
+                HttpSession session = request.getSession();
+                session.setAttribute("username", username);
+                session.setAttribute("roll", role);
+
+                // Redirect based on role
+                if ("admin".equalsIgnoreCase(role)) {
                     response.sendRedirect("admin.jsp");
+                } else if ("cashier".equalsIgnoreCase(role)) {
+                    response.sendRedirect("cashier.jsp");
                 } else {
-                    // For other users, display welcome message
-                    out.println("<html><head><title>Login Successful</title></head><body>");
-                    out.println("<h2>Login Successful! Welcome, " + username + "</h2>");
-                    out.println("</body></html>");
+                    response.sendRedirect("customer.jsp");
                 }
+
             } else {
                 // Invalid login credentials
                 out.println("<html><head><title>Login Failed</title></head><body>");
