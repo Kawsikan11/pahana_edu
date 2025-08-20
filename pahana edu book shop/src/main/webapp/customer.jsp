@@ -21,7 +21,7 @@
       <a href="#" class="nav-link">User Manual</a>
     </nav>
     <div class="logout-container">
-      <a href="logout.jsp" class="logout-btn">Logout</a>
+       <a href="index.jsp" class="logout-btn">Logout</a>
     </div>
   </aside>
 

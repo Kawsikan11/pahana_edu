@@ -1,11 +1,43 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
+<%@ page import="java.sql.*" %>
+<%
+    // Database connection
+    Class.forName("com.mysql.cj.jdbc.Driver");
+    Connection con = DriverManager.getConnection(
+        "jdbc:mysql://localhost:3306/pahana_edu","root","");
+
+    Statement st = con.createStatement();
+
+    // Total Sales (number of sales)
+    ResultSet rsTotalSales = st.executeQuery("SELECT COUNT(*) AS totalSales FROM sales");
+    rsTotalSales.next();
+    int totalSales = rsTotalSales.getInt("totalSales");
+
+    // Total Customers
+    ResultSet rsTotalCustomers = st.executeQuery("SELECT COUNT(*) AS totalCustomers FROM users");
+    rsTotalCustomers.next();
+    int totalCustomers = rsTotalCustomers.getInt("totalCustomers");
+
+    // Total Revenue (sum of total column)
+    ResultSet rsTotalRevenue = st.executeQuery("SELECT SUM(total) AS totalRevenue FROM sales");
+    rsTotalRevenue.next();
+    double totalRevenue = rsTotalRevenue.getDouble("totalRevenue");
+
+    // Last 5 sales
+    ResultSet rsRecentSales = st.executeQuery(
+        "SELECT s.id, u.name AS customerName, s.bookName, s.quantity, s.total, s.sale_date " +
+        "FROM sales s JOIN users u ON s.customerId = u.id " +
+        "ORDER BY s.sale_date DESC LIMIT 5"
+    );
+%>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <title>Admin Panel - Pahana Edu</title>
-  <link rel="stylesheet" href="admin.css?v=1.1" /> <!-- Cache bust -->
+  <link rel="stylesheet" href="admin.css?v=1.1" />
 </head>
 <body>
   <aside class="sidebar">
@@ -14,15 +46,15 @@
       <h2>Pahana Edu</h2>
     </div>
     <nav class="sidebar-nav">
-      <a href="#" class="nav-link active">Dashboard</a>
-      <a href="#" class="nav-link">Accounts</a>
-      <a href="#" class="nav-link">Sales</a>
-      <a href="#" class="nav-link">Items</a>
-      <a href="#" class="nav-link">Reports</a>
-      <a href="#" class="nav-link">User Manual</a>
+      <a href="admin.jsp" class="nav-link active">Dashboard</a>
+      <a href="adminacc.jsp" class="nav-link">Accounts</a>
+      <a href="adminsale.jsp" class="nav-link">Sales</a>
+      <a href="adminitem.jsp" class="nav-link">Items</a>
+      <a href="adminrep.jsp" class="nav-link">Reports</a>
+      <a href="billing.jsp" class="nav-link">Billing</a>
     </nav>
     <div class="logout-container">
-      <a href="logout.jsp" class="logout-btn">Logout</a>
+      <a href="index.jsp" class="logout-btn">Logout</a>
     </div>
   </aside>
 
@@ -35,15 +67,15 @@
     <section class="cards-container">
       <div class="card">
         <h3>Total Sales</h3>
-        <p>₹ 1,50,000</p>
+        <p> <%= totalSales %></p>
       </div>
       <div class="card">
         <h3>Total Customers</h3>
-        <p>320</p>
+        <p><%= totalCustomers %></p>
       </div>
       <div class="card">
         <h3>Total Revenue</h3>
-        <p>₹ 4,80,000</p>
+        <p>₹ <%= totalRevenue %></p>
       </div>
     </section>
 
@@ -56,39 +88,24 @@
             <th>Sale ID</th>
             <th>Customer Name</th>
             <th>Item</th>
-            <th>Date</th>
+            <th>Quantity</th>
             <th>Amount</th>
+            <th>Date</th>
           </tr>
         </thead>
         <tbody>
+          <%
+            while(rsRecentSales.next()) {
+          %>
           <tr>
-            <td>#101</td>
-            <td>John Doe</td>
-            <td>Book - Java Basics</td>
-            <td>2025-08-15</td>
-            <td>₹ 1,200</td>
+            <td><%= rsRecentSales.getInt("id") %></td>
+            <td><%= rsRecentSales.getString("customerName") %></td>
+            <td><%= rsRecentSales.getString("bookName") %></td>
+            <td><%= rsRecentSales.getInt("quantity") %></td>
+            <td>₹ <%= rsRecentSales.getDouble("total") %></td>
+            <td><%= rsRecentSales.getTimestamp("sale_date") %></td>
           </tr>
-          <tr>
-            <td>#102</td>
-            <td>Mary Smith</td>
-            <td>Notebook</td>
-            <td>2025-08-15</td>
-            <td>₹ 300</td>
-          </tr>
-          <tr>
-            <td>#103</td>
-            <td>Arun Kumar</td>
-            <td>Book - AI Concepts</td>
-            <td>2025-08-14</td>
-            <td>₹ 2,500</td>
-          </tr>
-          <tr>
-            <td>#104</td>
-            <td>Sara Lee</td>
-            <td>Pen Set</td>
-            <td>2025-08-13</td>
-            <td>₹ 450</td>
-          </tr>
+          <% } %>
         </tbody>
       </table>
     </section>
@@ -99,3 +116,12 @@
   </main>
 </body>
 </html>
+
+<%
+    rsTotalSales.close();
+    rsTotalCustomers.close();
+    rsTotalRevenue.close();
+    rsRecentSales.close();
+    st.close();
+    con.close();
+%>

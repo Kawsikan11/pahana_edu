@@ -48,7 +48,7 @@ public class LoginServlet extends HttpServlet {
                 } else if ("cashier".equalsIgnoreCase(role)) {
                     response.sendRedirect("cashier.jsp");
                 } else {
-                    response.sendRedirect("customer.jsp");
+                    response.sendRedirect("home2.jsp");
                 }
 
             } else {
