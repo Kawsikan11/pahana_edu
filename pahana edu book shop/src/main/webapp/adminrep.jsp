@@ -1,0 +1,41 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Report - Pahana Edu</title>
+  <link rel="stylesheet" href="adminacc.css?v=1.1" /> <!-- Cache bust -->
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <img src="logo.png" alt="Logo" class="logo" />
+      <h2>Pahana Edu</h2>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="admin.jsp" class="nav-link ">Dashboard</a>
+      <a href="adminacc.jsp" class="nav-link">Accounts</a>
+      <a href="adminsale.jsp" class="nav-link">Sales</a>
+      <a href="adminitem.jsp" class="nav-link">Items</a>
+      <a href="adminrep.jsp" class="nav-link active">Reports</a>
+      <a href="billing.jsp" class="nav-link">Billing</a>
+    </nav>
+    <div class="logout-container">
+     <a href="index.jsp" class="logout-btn">Logout</a>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header>
+      <h1>Dashboard</h1>
+    </header>
+
+
+
+    <section>
+      <p>Welcome to the Admin Panel. Select a section from the sidebar to get started.</p>
+    </section>
+  </main>
+</body>
+</html>
