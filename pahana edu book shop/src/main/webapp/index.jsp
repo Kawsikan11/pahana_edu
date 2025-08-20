@@ -80,7 +80,7 @@
             <a href="#">Books</a>
             <a href="#">About</a>
             <a href="#">Contact</a>
-            <button class="cart-btn" onclick="location.href='viewcart.jsp'">🛒 View Cart</button>
+            <button class="cart-btn" onclick="checkLogin()">🛒 View Cart</button>
             <button class="login-btn" onclick="location.href='login.jsp'">Login</button>
         </div>
     </nav>

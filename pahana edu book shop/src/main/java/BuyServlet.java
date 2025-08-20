@@ -7,9 +7,11 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
-@WebServlet("/AddToCardServlet")
-public class AddToCardServlet extends HttpServlet {
+@WebServlet("/BuyServlet")
+public class BuyServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) 
@@ -19,51 +21,43 @@ public class AddToCardServlet extends HttpServlet {
         PrintWriter out = response.getWriter();
 
         // Get logged-in username from session
-        HttpSession session = request.getSession(false); // false = do not create new session
+        HttpSession session = request.getSession(false);
         String customerName = null;
         if (session != null) {
             customerName = (String) session.getAttribute("username");
         }
-
         if (customerName == null) {
             out.println("<script>alert('Please login first!'); window.location='login.jsp';</script>");
             return;
         }
 
-        // Get book details from form
+        // Get book details from hidden inputs
+        int id = Integer.parseInt(request.getParameter("id"));
         String bookname = request.getParameter("bookname");
         String authorname = request.getParameter("authorname");
         String edition = request.getParameter("edition");
-        String yearStr = request.getParameter("year");
-        String qtyStr = request.getParameter("quantity");
-        String priceStr = request.getParameter("price");
+        int year = Integer.parseInt(request.getParameter("year"));
+        int quantity = Integer.parseInt(request.getParameter("quantity"));
+        double price = Double.parseDouble(request.getParameter("price"));
         String image = request.getParameter("image");
 
-        int year = 0;
-        int quantity = 1;
-        double price = 0;
-
-        try {
-            if (yearStr != null && !yearStr.isEmpty()) year = Integer.parseInt(yearStr);
-            if (qtyStr != null && !qtyStr.isEmpty()) quantity = Integer.parseInt(qtyStr);
-            if (priceStr != null && !priceStr.isEmpty()) price = Double.parseDouble(priceStr);
-        } catch (NumberFormatException e) {
-            out.println("<h3 style='color:red;'>Invalid number format!</h3>");
-            return;
-        }
+        // Current date and time
+        LocalDateTime now = LocalDateTime.now();
+        String date = now.toLocalDate().toString();
+        String time = now.toLocalTime().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
 
         Connection con = null;
         PreparedStatement ps = null;
+        PreparedStatement ps2 = null;
 
         try {
-            // Connect to database
             Class.forName("com.mysql.cj.jdbc.Driver");
             con = DriverManager.getConnection(
-                "jdbc:mysql://localhost:3306/pahana_edu", "root", "");
+                "jdbc:mysql://localhost:3306/pahana_edu","root","");
 
-            // Insert into addtocard table including customer_name
-            String sql = "INSERT INTO addtocard (bookname, authorname, edition, year, quantity, price, image, customer_name) " +
-                         "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            // Insert into purchase table including customer_name
+            String sql = "INSERT INTO purchase (bookname, authorname, edition, year, quantity, price, image, customer_name, purchase_date, purchase_time) " +
+                         "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             ps = con.prepareStatement(sql);
             ps.setString(1, bookname);
             ps.setString(2, authorname);
@@ -73,22 +67,29 @@ public class AddToCardServlet extends HttpServlet {
             ps.setDouble(6, price);
             ps.setString(7, image);
             ps.setString(8, customerName);
+            ps.setString(9, date);
+            ps.setString(10, time);
 
             int result = ps.executeUpdate();
 
-            if (result > 0) {
-                out.println("<script>alert('Book added to cart successfully!'); window.location='home2.jsp';</script>");
+            if(result > 0) {
+                out.println("<script>alert('Purchase successful!'); window.location='viewcards.jsp';</script>");
             } else {
-                out.println("<script>alert('Failed to add book to cart.'); window.location='home.jsp';</script>");
+                out.println("<script>alert('Purchase failed.'); window.location='viewcards.jsp';</script>");
             }
 
-        } catch (Exception e) {
+            // Remove from addtocard table after purchase
+            ps2 = con.prepareStatement("DELETE FROM addtocard WHERE id=?");
+            ps2.setInt(1, id);
+            ps2.executeUpdate();
+
+        } catch(Exception e) {
             out.println("<h3 style='color:red;'>Database Error: " + e.getMessage() + "</h3>");
             e.printStackTrace(out);
         } finally {
             try { if (ps != null) ps.close(); } catch (SQLException e) { e.printStackTrace(); }
+            try { if (ps2 != null) ps2.close(); } catch (SQLException e) { e.printStackTrace(); }
             try { if (con != null) con.close(); } catch (SQLException e) { e.printStackTrace(); }
         }
     }
 }
-

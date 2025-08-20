@@ -1,103 +1,128 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="java.sql.*" %>
+<%@ page import="java.util.*" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Customer Panel - Pahana Edu</title>
-  <link rel="stylesheet" href="customer.css?v=1.2" />
+    <meta charset="UTF-8" />
+    <title>Customer Panel - Pahana Edu</title>
+    <link rel="stylesheet" href="customer.css?v=1.2" />
 </head>
 <body>
-  <aside class="sidebar">
+<%
+    // Get the username input or from session
+    String username = request.getParameter("username");
+    if (username == null) {
+        username = (String) session.getAttribute("username"); // if stored in session
+    }
+
+    // Database connection parameters
+    String url = "jdbc:mysql://localhost:3306/pahana_edu";
+    String dbUser = "root";  // change if needed
+    String dbPass = "";      // change if needed
+
+    Connection con = null;
+    PreparedStatement ps = null;
+    ResultSet rs = null;
+
+    List<Map<String, String>> purchases = new ArrayList<>();
+
+    try {
+        Class.forName("com.mysql.cj.jdbc.Driver");
+        con = DriverManager.getConnection(url, dbUser, dbPass);
+
+        // Fetch last 5 purchases for the logged-in user
+        String sql = "SELECT id, bookname, price, purchase_date, purchase_time, quantity " +
+                     "FROM purchase WHERE customer_name=? ORDER BY purchase_date DESC, purchase_time DESC LIMIT 5";
+        ps = con.prepareStatement(sql);
+        ps.setString(1, username);
+        rs = ps.executeQuery();
+
+        while (rs.next()) {
+            Map<String, String> purchase = new HashMap<>();
+            purchase.put("id", rs.getString("id"));
+            purchase.put("bookname", rs.getString("bookname"));
+            purchase.put("price", rs.getString("price"));
+            purchase.put("purchase_date", rs.getString("purchase_date"));
+            purchase.put("purchase_time", rs.getString("purchase_time"));
+            purchase.put("quantity", rs.getString("quantity"));
+            purchases.add(purchase);
+        }
+
+    } catch (Exception e) {
+        out.println("Database error: " + e.getMessage());
+    } finally {
+        try { if (rs != null) rs.close(); } catch (Exception e) {}
+        try { if (ps != null) ps.close(); } catch (Exception e) {}
+        try { if (con != null) con.close(); } catch (Exception e) {}
+    }
+%>
+
+<aside class="sidebar">
     <div class="sidebar-header">
-      <img src="logo.png" alt="Logo" class="logo" />
-      <h2>Pahana Edu</h2>
+        <img src="logo.png" alt="Logo" class="logo" />
+        <h2>Pahana Edu</h2>
     </div>
     <nav class="sidebar-nav">
-      <a href="#" class="nav-link active">Dashboard</a>
-      <a href="#" class="nav-link">Profile</a>
-      <a href="#" class="nav-link">Purchases</a>
-      <a href="#" class="nav-link">Cart</a>
-      <a href="#" class="nav-link">User Manual</a>
+        <a href="customer.jsp" class="nav-link active">Dashboard</a>
+        
+        <a href="custpur.jsp" class="nav-link">Purchases</a>
+       
+        <a href="custum.jsp" class="nav-link">User Manual</a>
     </nav>
     <div class="logout-container">
-       <a href="index.jsp" class="logout-btn">Logout</a>
+        <a href="index.jsp" class="logout-btn">Logout</a>
     </div>
-  </aside>
+</aside>
 
-  <main class="main-content">
+<main class="main-content">
     <header>
-      <h1>Dashboard</h1>
+        <h1>Dashboard</h1>
     </header>
-
-    <!-- Cards Section -->
-    <section class="cards-container">
-      <div class="card">
-        <h3>Total Purchases</h3>
-        <p>₹ 15,500</p>
-      </div>
-      <div class="card">
-        <h3>Items in Cart</h3>
-        <p>8</p>
-      </div>
-    </section>
-
-    <!-- Recent Purchases / Cart Table -->
+    
     <section class="table-section">
-      <h2>Recent Purchases / Cart Items</h2>
-      <table class="sales-table">
-        <thead>
-          <tr>
-            <th>Item ID</th>
-            <th>Item Name</th>
-            <th>Status</th>
-            <th>Date</th>
-            <th>Amount</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>#201</td>
-            <td>Book - Java Basics</td>
-            <td>Purchased</td>
-            <td>2025-08-15</td>
-            <td>₹ 1,200</td>
-          </tr>
-          <tr>
-            <td>#202</td>
-            <td>Notebook</td>
-            <td>Purchased</td>
-            <td>2025-08-15</td>
-            <td>₹ 300</td>
-          </tr>
-          <tr>
-            <td>#203</td>
-            <td>Book - AI Concepts</td>
-            <td>Purchased</td>
-            <td>2025-08-14</td>
-            <td>₹ 2,500</td>
-          </tr>
-          <tr>
-            <td>#204</td>
-            <td>Pen Set</td>
-            <td>Cart</td>
-            <td>-</td>
-            <td>₹ 450</td>
-          </tr>
-          <tr>
-            <td>#205</td>
-            <td>Notebook</td>
-            <td>Cart</td>
-            <td>-</td>
-            <td>₹ 250</td>
-          </tr>
-        </tbody>
-      </table>
+        <h2>Last 5 Purchases</h2>
+        <table class="sales-table">
+            <thead>
+                <tr>
+                    <th>Item ID</th>
+                    <th>Item Name</th>
+                    <th>Quantity</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+            <%
+                if (!purchases.isEmpty()) {
+                    for (Map<String, String> purchase : purchases) {
+            %>
+                <tr>
+                    <td><%= purchase.get("id") %></td>
+                    <td><%= purchase.get("bookname") %></td>
+                    <td><%= purchase.get("quantity") %></td>
+                    <td><%= purchase.get("purchase_date") %></td>
+                    <td><%= purchase.get("purchase_time") %></td>
+                    <td>₹ <%= purchase.get("price") %></td>
+                </tr>
+            <%
+                    }
+                } else {
+            %>
+                <tr>
+                    <td colspan="6">No purchases found.</td>
+                </tr>
+            <%
+                }
+            %>
+            </tbody>
+        </table>
     </section>
-
+    
     <section>
-      <p>Welcome to the Customer Panel. Use the sidebar to navigate your profile, purchases, and cart.</p>
+        <p>Welcome <strong><%= username %></strong> to the Customer Panel. Use the sidebar to navigate your profile, purchases, and cart.</p>
     </section>
-  </main>
+</main>
 </body>
 </html>
